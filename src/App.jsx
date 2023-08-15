@@ -4,6 +4,7 @@ import AuthentificationPage from "./AuthentificationPage";
 import ProjectsPage from "./ProjectsPage";
 import TemplatesPage from "./TemplatesPage"
 import Header from "./Header";
+import DocumentCustomizationPage from "./DocumentCustomizationPage";
 
 function App() {
 
@@ -24,6 +25,7 @@ function App() {
           <Route path="/" element={<AuthentificationPage />} />
           <Route path="/projects" element={<ProjectsPage isProject={isProject} handleIsProject={handleIsProject} currentProjectId={currentProjectId} setCurrentProjectId={setCurrentProjectId} />} />
           <Route path='/templates' element={<TemplatesPage isProject={isProject} handleIsProject={handleIsProject} currentProjectId={currentProjectId} setCurrentProjectId={setCurrentProjectId}/>}/>
+          <Route path='/documentCustomization' element={<DocumentCustomizationPage/>} />
         </Routes>
       </Router>
     </div>

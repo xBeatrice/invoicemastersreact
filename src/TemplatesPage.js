@@ -40,6 +40,7 @@ const TemplatesPage = ({
   const [displayMode, setDisplayMode] = useState("grid");
 
   const location = useLocation(); // Use the useLocation hook
+  const navigate = useNavigate();
 
   const handleListDisplay = () => {
     setDisplayMode("list");
@@ -87,6 +88,11 @@ const TemplatesPage = ({
     }
   }, []);
 
+  const handleClickTemplate = (templateId) => {
+    setCurrentTemplateId(templateId);
+    navigate(`/documentCustomization?template=${templateId}`);
+  };
+
   return (
     <Container maxWidth>
       <div
@@ -122,7 +128,10 @@ const TemplatesPage = ({
           <Grid container spacing={2}>
             {templates.map((template) => (
               <Grid item key={template.id} xs={12} sm={6} md={4} lg={3}>
-                <Card elevation={5}>
+                <Card
+                  elevation={5}
+                  onClick={() => handleClickTemplate(template.id)}
+                >
                   <CardContent>
                     <Typography
                       variant="h5"
@@ -191,7 +200,10 @@ const TemplatesPage = ({
             <List>
               {templates.map((template) => (
                 <ListItem key={template.id}>
-                  <Card sx={{ width: "100%" }} onClick={setDeleteTemplateId}>
+                  <Card
+                    sx={{ width: "100%" }}
+                    onClick={() => handleClickTemplate(template.id)}
+                  >
                     <CardActionArea>
                       <div style={{ display: "flex" }}>
                         <Typography

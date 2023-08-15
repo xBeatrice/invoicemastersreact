@@ -90,6 +90,7 @@ const ProjectsPage = ({
     if (location.pathname.includes("projects")) {
       handleIsProject(true);
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   return (
