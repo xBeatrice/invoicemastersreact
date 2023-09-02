@@ -26,6 +26,13 @@ import FormatItalicIcon from "@mui/icons-material/FormatItalic";
 import FormatAlignLeftIcon from "@mui/icons-material/FormatAlignLeft";
 import FormatAlignRightIcon from "@mui/icons-material/FormatAlignRight";
 import FormatAlignJustifyIcon from "@mui/icons-material/FormatAlignJustify";
+import {
+  modifyTemplateContent,
+  deleteTemplateDB,
+  getTemplates,
+} from "./firebase";
+import { useLocation } from "react-router-dom";
+
 const DocumentCustomizationPage = () => {
   const [currentAlignBtn, setCurrentAlignBtn] = useState("left");
 
@@ -36,8 +43,20 @@ const DocumentCustomizationPage = () => {
   const [fontSize, setFontSize] = useState("10");
   const [showParagraphOptions, setShowParagraphOptions] = useState(false);
   const [appliedText, setAppliedText] = useState("");
+  const [templateContent, setTemplateContent] = useState({});
 
   const [activeSpan, setActiveSpan] = useState(null);
+
+  const divRefs = {
+    1: useRef(null),
+    2: useRef(null),
+    3: useRef(null),
+  };
+  const parentDivRef = useRef(null);
+
+  let updatedTemplateContent = "";
+  const location = useLocation();
+  const templateId = new URLSearchParams(location.search).get("template");
 
   const handleSetFontSize = (event) => {
     setFontSize(event.target.value);
@@ -84,11 +103,6 @@ const DocumentCustomizationPage = () => {
     setActiveOptionButton(buttonId);
     setShowParagraphOptions(buttonId === "paragraph");
   };
-  const divRefs = {
-    1: useRef(null),
-    2: useRef(null),
-    3: useRef(null),
-  };
 
   const handleApplyButtonClick = () => {
     if (activeAddButton && appliedText) {
@@ -109,12 +123,6 @@ const DocumentCustomizationPage = () => {
             textElement.style.fontStyle = "italic";
           }
           textElement.style.textAlign = currentAlignBtn;
-          textElement.style.display = "block";
-          textElement.style.width = "100%";
-          textElement.addEventListener("click", () => {
-            setAppliedText(textElement.textContent);
-            setActiveSpan(textElement);
-          });
         } else {
           // Create a new span element
           textElement = document.createElement("span");
@@ -138,12 +146,116 @@ const DocumentCustomizationPage = () => {
 
           targetDiv.appendChild(textElement);
         }
-      }
 
-      setAppliedText("");
-      setActiveSpan(null);
+        setAppliedText("");
+        setActiveSpan(null);
+
+        // Update the template content
+        updatedTemplateContent = {
+          ...updatedTemplateContent,
+          [activeAddButton]: targetDiv.innerHTML,
+        };
+
+        setTemplateContent(updatedTemplateContent);
+      }
     }
   };
+
+  React.useEffect(() => {
+    // Function to attach the click event listener to AddIcon buttons and update styles
+    const attachAddButtonClickListeners = () => {
+      Object.values(divRefs).forEach((ref, index) => {
+        const addButton = ref.current.querySelector("button");
+        if (addButton) {
+          addButton.addEventListener("click", () =>
+            handleAddButtonClick(index + 1)
+          );
+          addButton.style.backgroundColor =
+            activeAddButton === (index + 1).toString()
+              ? "darkorange"
+              : "primary";
+          addButton.addEventListener("mouseover", () => {
+            addButton.style.backgroundColor = "darkorange";
+          });
+          addButton.addEventListener("mouseout", () => {
+            addButton.style.backgroundColor =
+              activeAddButton === (index + 1).toString()
+                ? "darkorange"
+                : "primary";
+          });
+        }
+      });
+    };
+
+    // Fetch the current template by templateId and update the templateContent state
+    if (templateId) {
+      getTemplates()
+        .then((templates) => {
+          const template = templates.find(
+            (template) => template.id === templateId
+          );
+          if (template) {
+            const parsedContent = JSON.parse(template.data.content);
+
+            if (parsedContent["1"]) {
+              divRefs["1"].current.innerHTML = parsedContent["1"];
+            }
+            if (parsedContent["2"]) {
+              divRefs["2"].current.innerHTML = parsedContent["2"];
+            }
+            if (parsedContent["3"]) {
+              divRefs["3"].current.innerHTML = parsedContent["3"];
+            }
+
+            setTemplateContent(parsedContent);
+            attachAddButtonClickListeners(); // Attach click event listeners here
+          }
+        })
+        .catch((error) => {
+          console.error("Error fetching templates:", error);
+        });
+    }
+  }, [templateId, activeAddButton]);
+
+  const saveTemplate = () => {
+    // Get the inner HTML content of divRefs 1, 2, and 3
+    const div1Content = divRefs["1"].current.innerHTML;
+    const div2Content = divRefs["2"].current.innerHTML;
+    const div3Content = divRefs["3"].current.innerHTML;
+
+    // Create an updated template content object with the new content
+    updatedTemplateContent = {
+      ...updatedTemplateContent,
+      1: div1Content,
+      2: div2Content,
+      3: div3Content,
+    };
+
+    // Convert the updated template content to a JSON string
+    const templateContentString = JSON.stringify(updatedTemplateContent);
+
+    // Call the modifyTemplateContent function with the templateId and updated content
+    modifyTemplateContent(templateId, templateContentString)
+      .then(() => {
+        console.log("Template content updated successfully.");
+      })
+      .catch((error) => {
+        console.error("Error updating template content:", error);
+      });
+  };
+
+  const handleDeleteTemplate = () => {
+    // Call the deleteTemplateDB function with the templateId
+    deleteTemplateDB(templateId)
+      .then(() => {
+        console.log("Template deleted successfully.");
+        // You might want to navigate or perform other actions after deletion
+      })
+      .catch((error) => {
+        console.error("Error deleting template:", error);
+      });
+  };
+
   return (
     <Container maxWidth>
       <div style={{ textAlign: "end", marginTop: "20px" }}>
@@ -151,6 +263,7 @@ const DocumentCustomizationPage = () => {
           variant="contained"
           color="primary"
           sx={{ width: "100px", m: "10px" }}
+          onClick={() => saveTemplate()}
         >
           Save <SaveIcon />
         </Button>
@@ -158,6 +271,7 @@ const DocumentCustomizationPage = () => {
           variant="contained"
           color="primary"
           sx={{ width: "100px", m: "10px" }}
+          onClick={handleDeleteTemplate}
         >
           Delete <DeleteIcon />
         </Button>
@@ -241,7 +355,13 @@ const DocumentCustomizationPage = () => {
               marginLeft: "200px",
             }}
           >
-            <CardContent sx={{ m: "10px" }}>
+            <CardContent
+              sx={{ m: "10px" }}
+              // ref={parentDivRef}
+              // dangerouslySetInnerHTML={{
+              //   __html: templateContent["parent"] || "",
+              // }}
+            >
               <div
                 ref={divRefs["1"]}
                 id="upper"
