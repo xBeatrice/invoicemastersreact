@@ -161,6 +161,18 @@ const DocumentCustomizationPage = () => {
     }
   };
 
+  const attachClickEventListeners = () => {
+    Object.values(divRefs).forEach((ref) => {
+      const textElements = ref.current.querySelectorAll("span");
+      textElements.forEach((textElement) => {
+        textElement.addEventListener("click", () => {
+          setAppliedText(textElement.textContent);
+          setActiveSpan(textElement);
+        });
+      });
+    });
+  };
+
   React.useEffect(() => {
     // Function to attach the click event listener to AddIcon buttons and update styles
     const attachAddButtonClickListeners = () => {
@@ -209,6 +221,7 @@ const DocumentCustomizationPage = () => {
 
             setTemplateContent(parsedContent);
             attachAddButtonClickListeners(); // Attach click event listeners here
+            attachClickEventListeners(); // Attach click event listeners to text elements
           }
         })
         .catch((error) => {
@@ -242,6 +255,8 @@ const DocumentCustomizationPage = () => {
       .catch((error) => {
         console.error("Error updating template content:", error);
       });
+
+    attachClickEventListeners();
   };
 
   const handleDeleteTemplate = () => {
