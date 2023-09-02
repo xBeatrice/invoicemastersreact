@@ -31,7 +31,7 @@ import {
   deleteTemplateDB,
   getTemplates,
 } from "./firebase";
-import { useLocation } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 
 const DocumentCustomizationPage = () => {
   const [currentAlignBtn, setCurrentAlignBtn] = useState("left");
@@ -52,10 +52,10 @@ const DocumentCustomizationPage = () => {
     2: useRef(null),
     3: useRef(null),
   };
-  const parentDivRef = useRef(null);
 
   let updatedTemplateContent = "";
   const location = useLocation();
+  const navigate = useNavigate();
   const templateId = new URLSearchParams(location.search).get("template");
 
   const handleSetFontSize = (event) => {
@@ -72,7 +72,9 @@ const DocumentCustomizationPage = () => {
   const handleCurrentAlignBtn = (alignment) => {
     setCurrentAlignBtn(alignment);
   };
-
+  const handleClickPreview = (templateId) => {
+    navigate(`/previewPage?template=${templateId}`);
+  };
   const handleToggleTextOption = (option) => {
     if (option === "normal") {
       setTextOptions({
@@ -294,6 +296,7 @@ const DocumentCustomizationPage = () => {
           variant="contained"
           color="primary"
           sx={{ width: "100px", m: "10px" }}
+          onClick={() => handleClickPreview(templateId)}
         >
           Preview <PreviewIcon />
         </Button>

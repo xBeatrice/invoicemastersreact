@@ -5,6 +5,7 @@ import ProjectsPage from "./ProjectsPage";
 import TemplatesPage from "./TemplatesPage"
 import Header from "./Header";
 import DocumentCustomizationPage from "./DocumentCustomizationPage";
+import PreviewPage from "./PreviewPage"
 
 function App() {
 
@@ -26,6 +27,8 @@ function App() {
           <Route path="/projects" element={<ProjectsPage isProject={isProject} handleIsProject={handleIsProject} currentProjectId={currentProjectId} setCurrentProjectId={setCurrentProjectId} />} />
           <Route path='/templates' element={<TemplatesPage isProject={isProject} handleIsProject={handleIsProject} currentProjectId={currentProjectId} setCurrentProjectId={setCurrentProjectId}/>}/>
           <Route path='/documentCustomization' element={<DocumentCustomizationPage/>} />
+          <Route path='/previewPage' element={<PreviewPage/>} />
+
         </Routes>
       </Router>
     </div>
