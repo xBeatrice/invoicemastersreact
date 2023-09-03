@@ -18,8 +18,11 @@ const removeButtonsFromContent = (content) => {
 const PreviewPage = () => {
   const [previewContent, setPreviewContent] = useState({});
 
+  const handlePreview = (content) => {
+    setPreviewContent(content);
+  };
+
   const location = useLocation();
-  const navigate = useNavigate();
   const templateId = new URLSearchParams(location.search).get("template");
 
   const divRefs = {
@@ -87,7 +90,7 @@ const PreviewPage = () => {
               divRefs["3"].current.style.borderBottom = "none";
             }
 
-            setPreviewContent(parsedContent);
+            handlePreview(parsedContent);
           }
         })
         .catch((error) => {
@@ -99,6 +102,8 @@ const PreviewPage = () => {
   return (
     <div>
       <Button
+        variant="contained"
+        sx={{ mt: "20px" }}
         onClick={() => {
           exportToPDF();
         }}
